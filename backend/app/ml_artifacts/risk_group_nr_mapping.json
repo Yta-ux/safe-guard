@@ -1,0 +1,27 @@
+{
+  "Queda": [
+    "NR-18",
+    "NR-35"
+  ],
+  "Esmagamento/Impacto": [
+    "NR-12",
+    "NR-18"
+  ],
+  "Elétrico": [
+    "NR-10"
+  ],
+  "Incêndio/Explosão": [
+    "NR-18",
+    "NR-23"
+  ],
+  "Colapso Estrutural": [
+    "NR-18"
+  ],
+  "Asfixia/Intoxicação": [
+    "NR-15",
+    "NR-33"
+  ],
+  "Outros": [
+    "NR-01"
+  ]
+}
