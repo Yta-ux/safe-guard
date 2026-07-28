@@ -1,0 +1,331 @@
+@import "tailwindcss";
+
+/* ============================================
+   SafeGuard Design System — Sahara Risk
+   TailwindCSS v4 Theme Configuration
+   ============================================ */
+
+/* Dark mode variant using class strategy */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================
+   CSS Custom Properties (Light + Dark)
+   ============================================ */
+:root {
+  /* Light Theme (default) */
+  --color-background: #fdfbf7;
+  --color-on-background: #1c1917;
+  --color-surface: #fdfbf7;
+  --color-surface-dim: #e7e5e4;
+  --color-surface-bright: #ffffff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f7f5f0;
+  --color-surface-container: #f2efe9;
+  --color-surface-container-high: #e7e3dc;
+  --color-surface-container-highest: #ddd8d0;
+  --color-surface-variant: #e7e3dc;
+  --color-surface-tint: #b45309;
+  --color-on-surface: #1c1917;
+  --color-on-surface-variant: #57534e;
+  --color-inverse-surface: #292524;
+  --color-inverse-on-surface: #f5f5f4;
+  --color-outline: #a8a29e;
+  --color-outline-variant: #d6d3d1;
+  --color-primary: #b45309;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #d97706;
+  --color-on-primary-container: #fffbeb;
+  --color-inverse-primary: #fbbf24;
+  --color-primary-fixed: #fef3c7;
+  --color-primary-fixed-dim: #fde68a;
+  --color-on-primary-fixed: #451a03;
+  --color-on-primary-fixed-variant: #78350f;
+  --color-secondary: #ca8a04;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #fef08a;
+  --color-on-secondary-container: #713f12;
+  --color-secondary-fixed: #fef08a;
+  --color-secondary-fixed-dim: #fde047;
+  --color-on-secondary-fixed: #365314;
+  --color-on-secondary-fixed-variant: #4d7c0f;
+  --color-tertiary: #0284c7;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #e0f2fe;
+  --color-on-tertiary-container: #0369a1;
+  --color-tertiary-fixed: #e0f2fe;
+  --color-tertiary-fixed-dim: #bae6fd;
+  --color-on-tertiary-fixed: #0c4a6e;
+  --color-on-tertiary-fixed-variant: #075985;
+  --color-error: #dc2626;
+  --color-on-error: #ffffff;
+  --color-error-container: #fee2e2;
+  --color-on-error-container: #991b1b;
+}
+
+.dark {
+  /* Dark Theme — Elegant Charcoal Slate (Soft, Distinguishable, Premium) */
+  --color-background: #18181b;
+  --color-on-background: #f4f4f5;
+  --color-surface: #18181b;
+  --color-surface-dim: #18181b;
+  --color-surface-bright: #27272a;
+  --color-surface-container-lowest: #27272a;
+  --color-surface-container-low: #212124;
+  --color-surface-container: #2e2e33;
+  --color-surface-container-high: #38383e;
+  --color-surface-container-highest: #424249;
+  --color-surface-variant: #3a3a40;
+  --color-surface-tint: #f59e0b;
+  --color-on-surface: #f4f4f5;
+  --color-on-surface-variant: #a1a1aa;
+  --color-inverse-surface: #f4f4f5;
+  --color-inverse-on-surface: #18181b;
+  --color-outline: #52525b;
+  --color-outline-variant: #3f3f46;
+  --color-primary: #f59e0b;
+  --color-on-primary: #18181b;
+  --color-primary-container: #b45309;
+  --color-on-primary-container: #fef3c7;
+  --color-inverse-primary: #d97706;
+  --color-primary-fixed: #fef3c7;
+  --color-primary-fixed-dim: #fde68a;
+  --color-on-primary-fixed: #451a03;
+  --color-on-primary-fixed-variant: #78350f;
+  --color-secondary: #eab308;
+  --color-on-secondary: #18181b;
+  --color-secondary-container: #713f12;
+  --color-on-secondary-container: #fef08a;
+  --color-secondary-fixed: #fef08a;
+  --color-secondary-fixed-dim: #fde047;
+  --color-on-secondary-fixed: #1a2e05;
+  --color-on-secondary-fixed-variant: #365314;
+  --color-tertiary: #38bdf8;
+  --color-on-tertiary: #0c4a6e;
+  --color-tertiary-container: #075985;
+  --color-on-tertiary-container: #e0f2fe;
+  --color-tertiary-fixed: #e0f2fe;
+  --color-tertiary-fixed-dim: #bae6fd;
+  --color-on-tertiary-fixed: #0c4a6e;
+  --color-on-tertiary-fixed-variant: #075985;
+  --color-error: #f87171;
+  --color-on-error: #450a0a;
+  --color-error-container: #7f1d1d;
+  --color-on-error-container: #fecaca;
+}
+
+/* ============================================
+   TailwindCSS v4 Theme Tokens
+   ============================================ */
+@theme {
+  --color-background: var(--color-background);
+  --color-on-background: var(--color-on-background);
+  --color-surface: var(--color-surface);
+  --color-surface-dim: var(--color-surface-dim);
+  --color-surface-bright: var(--color-surface-bright);
+  --color-surface-container-lowest: var(--color-surface-container-lowest);
+  --color-surface-container-low: var(--color-surface-container-low);
+  --color-surface-container: var(--color-surface-container);
+  --color-surface-container-high: var(--color-surface-container-high);
+  --color-surface-container-highest: var(--color-surface-container-highest);
+  --color-surface-variant: var(--color-surface-variant);
+  --color-surface-tint: var(--color-surface-tint);
+  --color-on-surface: var(--color-on-surface);
+  --color-on-surface-variant: var(--color-on-surface-variant);
+  --color-inverse-surface: var(--color-inverse-surface);
+  --color-inverse-on-surface: var(--color-inverse-on-surface);
+  --color-outline: var(--color-outline);
+  --color-outline-variant: var(--color-outline-variant);
+  --color-primary: var(--color-primary);
+  --color-on-primary: var(--color-on-primary);
+  --color-primary-container: var(--color-primary-container);
+  --color-on-primary-container: var(--color-on-primary-container);
+  --color-inverse-primary: var(--color-inverse-primary);
+  --color-primary-fixed: var(--color-primary-fixed);
+  --color-primary-fixed-dim: var(--color-primary-fixed-dim);
+  --color-on-primary-fixed: var(--color-on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--color-on-primary-fixed-variant);
+  --color-secondary: var(--color-secondary);
+  --color-on-secondary: var(--color-on-secondary);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-on-secondary-container: var(--color-on-secondary-container);
+  --color-secondary-fixed: var(--color-secondary-fixed);
+  --color-secondary-fixed-dim: var(--color-secondary-fixed-dim);
+  --color-on-secondary-fixed: var(--color-on-secondary-fixed);
+  --color-on-secondary-fixed-variant: var(--color-on-secondary-fixed-variant);
+  --color-tertiary: var(--color-tertiary);
+  --color-on-tertiary: var(--color-on-tertiary);
+  --color-tertiary-container: var(--color-tertiary-container);
+  --color-on-tertiary-container: var(--color-on-tertiary-container);
+  --color-tertiary-fixed: var(--color-tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--color-tertiary-fixed-dim);
+  --color-on-tertiary-fixed: var(--color-on-tertiary-fixed);
+  --color-on-tertiary-fixed-variant: var(--color-on-tertiary-fixed-variant);
+  --color-error: var(--color-error);
+  --color-on-error: var(--color-on-error);
+  --color-error-container: var(--color-error-container);
+  --color-on-error-container: var(--color-on-error-container);
+
+  --font-display: 'Manrope', sans-serif;
+  --font-body: 'Manrope', sans-serif;
+  --font-heading: 'Manrope', sans-serif;
+  --font-label: 'Manrope', sans-serif;
+
+  --spacing-container-padding: 24px;
+  --spacing-gutter: 16px;
+  --spacing-stack-sm: 8px;
+  --spacing-stack-md: 16px;
+  --spacing-stack-lg: 32px;
+  --spacing-base: 8px;
+
+  --radius-sm: 0.25rem;
+  --radius-DEFAULT: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-slide-up: slide-up 0.4s ease-out;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-spin-slow: spin 1.5s linear infinite;
+}
+
+/* ============================================
+   Keyframes
+   ============================================ */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+html {
+  font-family: 'Manrope', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Material Symbols configuration */
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+.material-symbols-outlined.filled {
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+/* ============================================
+   Typography Utility Classes
+   ============================================ */
+.text-display {
+  font-family: 'Manrope', sans-serif;
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.text-headline-lg {
+  font-family: 'Manrope', sans-serif;
+  font-size: 26px;
+  line-height: 34px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.text-headline-lg-mobile {
+  font-family: 'Manrope', sans-serif;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+}
+
+.text-headline-md {
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 600;
+}
+
+.text-body-lg {
+  font-family: 'Manrope', sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+
+.text-body-md {
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+.text-label-md {
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.text-label-sm {
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-container);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-outline);
+}
