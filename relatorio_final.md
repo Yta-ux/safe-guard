@@ -116,11 +116,12 @@ O teste de coeficientes lineares do algoritmo `LinearSVC` (célula 16 do noteboo
 ## 6. O RAG, MLOps e a Arquitetura da Solução
 
 ### 6.1 Funcionamento do RAG (IA Generativa)
-- **Pré-processamento Semântico:** Limpa frases de ruído em português (ex: *"como prevenir..."*) antes de pesquisar.
-- **Busca por Similaridade:** Pesquisa nos trechos oficiais das NRs no arquivo `nrs_official.json`.
-- **Geração Ancorada (Gemini 1.5 Flash):** Gera parecer regulatório em Markdown (Enquadramento, Risco, Plano de Ação e Checklist).
-- **Proteção Anti-Alucinação:** Se o assunto não constar na base oficial de NRs, o sistema responde que a informação está ausente da norma.
-- **Desempenho no Docker (Lazy Loading):** Inicialização tardia sob demanda para evitar que o container Docker trave baixando modelos pesados.
+- **Pré-processamento Semântico e Filtragem de Stopwords:** Purifica a consulta do usuário removendo pontuações e ruídos linguísticos em português (ex: *"como prevenir"*, *"qual a alíquota de"*), preservando apenas termos de relevância semântica.
+- **Busca por Similaridade de Cosseno:** Pesquisa nos trechos oficiais das NRs no arquivo `nrs_official.json`.
+- **Proteção Anti-Alucinação Estrita (`foundInKnowledgeBase = False`):** Caso o score máximo de similaridade seja menor que o limiar mínimo ($0,05$), indicando que a pergunta está fora do escopo de Segurança do Trabalho (ex: consultas sobre impostos, trânsito, receitas ou regras ambientais externas), o sistema interrompe a consulta e retorna categoricamente a mensagem: *"A base de conhecimento de segurança do trabalho não possui trechos diretos sobre esta consulta. Recomenda-se consulta direta às NRs do MTE."*
+- **Geração Ancorada (Gemini 1.5 Flash):** Para consultas válidas sobre NRs, gera o parecer regulatório estruturado em Markdown (Enquadramento Regulatório, Avaliação do Perigo, Plano de Ação e Checklist de Campo).
+- **Desempenho no Docker (Lazy Loading):** Inicialização tardia sob demanda para evitar que o container Docker trave baixando modelos pesados no *startup*.
+
 
 ### 6.2 Gestão Completa de Relatos (Dashboard e Endpoints)
 - **`DELETE /reports/{id}`:** Endpoint backend que permite deletar análises diretamente do banco PostgreSQL.

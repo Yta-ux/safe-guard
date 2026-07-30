@@ -6,6 +6,7 @@ from typing import List, Dict, Any, Optional
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from app.config import settings
+from app.services.document_service import PT_STOPWORDS
 
 KB_FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "knowledge_base", "nrs_official.json")
 DOCS_DIR_PATH = os.path.join(os.path.dirname(__file__), "..", "knowledge_base", "docs")
@@ -71,7 +72,7 @@ class RagEngine:
                 print(f"[RAG Service] Erro ao ler documento {file_name}: {err}")
 
     def _ensure_embeddings(self):
-        """Inicialização tardia (lazy loading) dos embeddings para evitar travamento na inicialização."""
+        """Inicialização tardia (lazy loading) dos embeddings com TF-IDF sem ruídos de stopwords."""
         if self.embeddings is not None:
             return
 
@@ -79,11 +80,13 @@ class RagEngine:
         if not texts:
             return
 
-        # TF-IDF primário rápido para não travar a aplicação em ambientes Docker sem GPU/modelo local
-        self.tfidf_vectorizer = TfidfVectorizer(ngram_range=(1, 2))
+        # TF-IDF primário rápido filtrando stopwords em português para prevenir falsos positivos
+        self.tfidf_vectorizer = TfidfVectorizer(
+            stop_words=list(PT_STOPWORDS),
+            ngram_range=(1, 2)
+        )
         self.embeddings = self.tfidf_vectorizer.fit_transform(texts).toarray()
 
-        # Tenta carregar o SentenceTransformer em background ou se disponível
         if not self._encoder_loaded:
             try:
                 from sentence_transformers import SentenceTransformer
@@ -91,12 +94,11 @@ class RagEngine:
                 self.embeddings = self.encoder.encode(texts, show_progress_bar=False)
                 self._encoder_loaded = True
             except Exception:
-                # Mantém TF-IDF se a lib não estiver presente ou o download falhar
                 self.encoder = None
                 self._encoder_loaded = True
 
     def _preprocess_query(self, query: str) -> str:
-        """Remove expressões de ruído da consulta para busca semântica purificada."""
+        """Remove ruídos de pontuação e stopwords para busca semântica estrita."""
         q_clean = query.lower()
         noise_phrases = [
             "oq fazer para prevenir", "o que fazer para prevenir", "como prevenir", "como evitar",
@@ -106,8 +108,10 @@ class RagEngine:
         for np_phrase in noise_phrases:
             q_clean = q_clean.replace(np_phrase, "")
 
-        q_clean = q_clean.strip()
-        return q_clean if len(q_clean) > 2 else query
+        words = [w.strip(",.?!:;()") for w in q_clean.split() if len(w) > 2]
+        meaningful_words = [w for w in words if w not in PT_STOPWORDS]
+
+        return " ".join(meaningful_words) if meaningful_words else query.strip()
 
     def search_chunks(
         self,
@@ -116,7 +120,7 @@ class RagEngine:
         top_k: int = 3,
         similarity_threshold: float = 0.05
     ) -> List[Dict[str, Any]]:
-        """Realiza busca por similaridade de cosseno com TF-IDF / embeddings semânticos."""
+        """Realiza busca por similaridade de cosseno com validação estrita anti-alucinação."""
         if not self.chunks:
             return []
 
@@ -137,19 +141,26 @@ class RagEngine:
             return []
 
         similarities = cosine_similarity(query_emb, self.embeddings)[0]
+
+        # Se o score máximo de similaridade for menor que o limiar (ex: 0.05), a pergunta está fora de escopo das NRs!
+        if similarities.max() < similarity_threshold:
+            return []
+
         scores = similarities.copy()
 
+        # Bônus por categoria e palavras-chave relevantes apenas para chunks que tiveram similaridade real
         if category_filter:
             for idx, chunk in enumerate(self.chunks):
-                if chunk.get("applicableCategory", "").lower() == category_filter.lower():
-                    scores[idx] += 0.15
-
-        clean_words = [w for w in clean_query.split() if len(w) > 3]
-        for idx, chunk in enumerate(self.chunks):
-            chunk_text = (chunk.get("text", "") + " " + chunk.get("normTitle", "")).lower()
-            for word in clean_words:
-                if word in chunk_text:
+                if scores[idx] > 0.01 and chunk.get("applicableCategory", "").lower() == category_filter.lower():
                     scores[idx] += 0.10
+
+        clean_words = [w for w in clean_query.split() if w not in PT_STOPWORDS and len(w) > 3]
+        for idx, chunk in enumerate(self.chunks):
+            if scores[idx] > 0.01:
+                chunk_text = (chunk.get("text", "") + " " + chunk.get("normTitle", "")).lower()
+                for word in clean_words:
+                    if word in chunk_text:
+                        scores[idx] += 0.05
 
         top_indices = np.argsort(scores)[::-1][:top_k]
 
@@ -160,13 +171,8 @@ class RagEngine:
                 chunk_data["score"] = float(scores[idx])
                 results.append(chunk_data)
 
-        if not results and len(self.chunks) > 0:
-            for idx in top_indices[:2]:
-                chunk_data = self.chunks[idx].copy()
-                chunk_data["score"] = float(scores[idx])
-                results.append(chunk_data)
-
         return results
+
 
     def query_norm_with_gemini(
         self,
