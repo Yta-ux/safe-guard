@@ -1,7 +1,6 @@
 # 🛡️ RELATÓRIO TÉCNICO FINAL — SAFEGUARD
 ## Sistema Inteligente de Suporte e Classificação Ocupacional em Segurança do Trabalho (SST)
 
-**Módulo 8 — Inteligência Artificial e Aprendizado de Máquina**  
 **Projeto Final:** Assistente Inteligente de Suporte e Análise de Riscos Ocupacionais  
 **Autor:** Ítalo Gustavo  
 **Repositório do Projeto:** `safe-guard`  
@@ -16,9 +15,15 @@ O **SafeGuard** é um ecossistema integrado para Segurança e Saúde no Trabalho
 
 O ecossistema combina **Machine Learning Clássico** para classificação de baixíssima latência (~2ms) com **IA Generativa / RAG** servidos por uma **API FastAPI** containerizada com **Docker**, acompanhada de uma interface visual em **React / Tailwind / Lucide**.
 
+### 1.1 Coerência de Domínio (Atendimento Estrito à Seção 6 do Edital)
+Conforme exigido na Seção 6 do Edital, **o dataset do classificador e a base do RAG pertencem rigorosamente ao mesmo universo temático (Segurança e Saúde no Trabalho — SST)**:
+- **Insumo do Classificador:** Relatos reais de acidentes e incidentes de trabalho (*OSHA Construction Accidents*).
+- **Insumo do RAG:** Base oficial de Normas Regulamentadoras de SST (*NR-01, NR-06, NR-10, NR-11, NR-12, NR-15, NR-17, NR-18, NR-20, NR-23, NR-26, NR-33, NR-35*).
+- **Integração Temática Coesa:** Quando o classificador categoriza uma ocorrência em `Elétrico`, o sistema direciona a consulta do RAG para os requisitos técnicos da **NR-10 (Instalações Elétricas)**; quando prevê `Queda`, conecta-se à **NR-35 (Trabalho em Altura)** e **NR-18**; quando prevê `Esmagamento/Impacto`, aciona a **NR-12 (Máquinas)**. Dessa forma, ambos os componentes se complementam perfeitamente no mesmo domínio profissional.
+
 ---
 
-## 2. Componente A — Classificador de Solicitações (ML Clássico)
+## 2. Classificador de Solicitações
 
 ### 2.1 Base de Dados e Limpeza Criteriosa
 - **Dataset:** *OSHA Construction Accidents* contendo **4.470 relatos reais de acidentes de trabalho**.
@@ -40,8 +45,8 @@ Foram desenvolvidos e comparados pipelines distintos com divisão estratificada 
 
 | Pipeline | Algoritmo | Vetorização | Estratégia de Balanço |
 |---|---|---|---|
-| **Pipeline A (Baseline)** | Logistic Regression | TF-IDF (n-gramas 1-2, 5.000 feat) | `class_weight='balanced'` |
-| **Pipeline B (Proposto Vencedor)** | LinearSVC High-Perf | TF-IDF (n-gramas 1-3, 10.000 feat, Sublinear TF) | `class_weight='balanced'` |
+| **Pipeline A** | Logistic Regression | TF-IDF (n-gramas 1-2, 5.000 feat) | `class_weight='balanced'` |
+| **Pipeline B** | LinearSVC High-Perf | TF-IDF (n-gramas 1-3, 10.000 feat, Sublinear TF) | `class_weight='balanced'` |
 
 ### 2.4 Avaliação de Desempenho
 O **Pipeline B (LinearSVC)** superou a baseline em todas as métricas globais e por classe:
@@ -80,11 +85,12 @@ Esmagamento/Impacto     0.8039    0.8184    0.8111       358
 - **Análise de Erros:** As poucas confusões do modelo ocorrem predominantemente entre *Esmagamento/Impacto* e *Queda* em incidentes envolvendo quedas de objetos sobre trabalhadores em andaimes (dupla causalidade física real no relato).
 
 ### 2.6 Justificativa da Arquitetura (Tradução prévia vs Embeddings Brutos)
-Experimentos adicionais com modelos de Embeddings Multilíngues diretos (`paraphrase-multilingual-MiniLM-L12-v2`) sobre os textos em português sem tradução obtiveram **F1 Macro de ~0.71**, enquanto a arquitetura adotada (**Tradução técnica PT ➔ EN via API + LinearSVC especialista**) atingiu **F1 Macro de 0.7884**. Isso comprova que a representação de n-gramas em texto especializado traduzido é mais discriminativa do que embeddings semânticos genéricos para textos técnicos curtos.
+Experimentos com Embeddings Multilíngues, que tinha como objetivo classificar os textos sem a necessidade de tradução prévia, (`paraphrase-multilingual-MiniLM-L12-v2`), obtiveram **F1 Macro de ~0.71**, enquanto a arquitetura adotada (**Tradução técnica PT ➔ EN via API + LinearSVC especialista**) atingiu **F1 Macro de 0.7884**. Isso comprova que realizar o processo de tradução dos textos digitados pelo usuário sem delegar para ML, aumentam as métricas da solução final.
+
 
 ---
 
-## 3. Componente B — Assistente de Resposta via RAG (IA Generativa)
+## 3. Assistente de Resposta via RAG (IA Generativa)
 
 ### 3.1 Base de Conhecimento Normativa
 A base do RAG (`nrs_official.json`) foi construída a partir de trechos oficiais atualizados das Normas Regulamentadoras:
@@ -103,7 +109,7 @@ O prompt fornecido ao LLM (**Gemini 1.5 Flash**) força o ancoramento estrito no
 
 ---
 
-## 4. Componente C — API que Serve o Sistema (FastAPI)
+## 4. API que Serve o Sistema (FastAPI)
 
 ### 4.1 Arquitetura e Endpoints
 O backend foi construído em **FastAPI** modularizado em rotas e serviços:
@@ -117,7 +123,7 @@ O backend foi construído em **FastAPI** modularizado em rotas e serviços:
 
 ---
 
-## 5. Componente D — Reflexão sobre Operação (MLOps, Custo e Latência)
+## 5. Reflexão sobre Operação (MLOps, Custo e Latência)
 
 ### 5.1 Monitoramento e Detecção de Drift em Produção
 - **Data Drift:** Alterações no vocabulário de relatórios de acidentes decorrentes da introdução de novos equipamentos (ex: drones na construção civil, energia solar/eólica).
@@ -155,18 +161,19 @@ cd notebooks
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt  # ou pacotes: pandas numpy scikit-learn matplotlib seaborn joblib
-jupyter notebook componente_a_classificador.ipynb
+jupyter notebook classificador.ipynb
 ```
 
 ---
 
-## 7. Conclusão e Tabela de Cumprimento da Rubrica
+## 7. Exemplos e Arquivos de Teste
 
-| Critério da Rubrica | Status no SafeGuard | Evidência no Projeto |
-|---|---|---|
-| **Modelo Clássico e Avaliação (25%)** | **Excelente** | 2 pipelines comparados (Baseline vs LinearSVC), F1 Macro de 0.7884, Acurácia 81.81%, balanceamento de classes e métricas completas por classe. |
-| **Interpretabilidade / Análise de Erros (10%)** | **Excelente** | XAI via coeficientes determinantes do LinearSVC + matriz de confusão e análise detalhada dos top erros. |
-| **Componente de IA Generativa / RAG (25%)** | **Excelente** | RAG funcional sobre NRs oficiais, busca semântica TF-IDF, prompt anti-alucinação ("Informação Ausente") e exibição auditável de fontes. |
-| **API e Serviço (20%)** | **Excelente** | API FastAPI com validação Pydantic, serialização `.joblib` de modelo pré-carregado e suporte a envio de arquivos PDF. |
-| **Reflexão sobre Operação (10%)** | **Excelente** | Discussão de drift (KS-test), latência ML (~2ms) vs RAG (~800ms), custos e limites operacionais. |
-| **Organização e Reprodutibilidade (10%)** | **Excelente** | Código limpo, estrutura de repositório organizada (Backend, Frontend, Notebooks), Docker Compose funcional e ambiente `.venv` configurado. |
+Para facilitar os testes de validação do sistema pelo usuário e avaliadores, a pasta [`examples`](file:///home/italo-gustavo/Documentos/Projects/safe-guard/examples) contém insumos prontos para uso:
+
+1. **Perguntas para o Assistente RAG (`perguntas_exemplo.txt`):**
+   - Arquivo: [`examples/perguntas_exemplo.txt`](file:///home/italo-gustavo/Documentos/Projects/safe-guard/examples/perguntas_exemplo.txt)
+   - **Descrição:** Conjunto estruturado de perguntas cobrindo as 7 categorias de risco (NR-10, NR-12, NR-18, NR-20, NR-23, NR-33, NR-35) e casos out-of-scope para validação de ausência de alucinação no RAG.
+
+2. **Relatório Simulado para Classificação de Documentos (`relatorio_exemplo.txt` e `relatorio_exemplo.md`):**
+   - Arquivos: [`examples/relatorio_exemplo.txt`](file:///home/italo-gustavo/Documentos/Projects/safe-guard/examples/relatorio_exemplo.txt) e [`examples/relatorio_exemplo.md`](file:///home/italo-gustavo/Documentos/Projects/safe-guard/examples/relatorio_exemplo.md)
+   - **Descrição:** Documento que simula um relatório real de investigação de acidente de trabalho (envolvendo manutenção em painel elétrico energizado). Pode ser utilizado para testar o upload de documentos ou colagem de texto no endpoint `/api/reports/classify-document` e na interface web do SafeGuard.

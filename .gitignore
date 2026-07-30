@@ -10,6 +10,8 @@ __pycache__/
 .coverage
 htmlcov/
 
+examples/roteiro_apresentacao.md
+
 # Node.js / Frontend
 node_modules/
 frontend/node_modules/

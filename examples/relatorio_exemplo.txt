@@ -1,0 +1,49 @@
+================================================================================
+ RELATÓRIO DE INVESTIGAÇÃO DE INCIDENTE OCUPACIONAL - SAFEGUARD TESTE
+================================================================================
+Código do Relatório: REG-SST-2026-089
+Data da Ocorrência: 15/07/2026 - 14:30h
+Setor / Local: Galpão Industrial 03 - Setor de Manutenção Mecânica e Elétrica
+Unidade: Planta de Montagem Estrutural
+
+--------------------------------------------------------------------------------
+1. DADOS DOS ENVOLVIDOS E OCORRÊNCIA
+--------------------------------------------------------------------------------
+Função do Trabalhador: Eletricista de Manutenção Industrial
+Tipo de Registro: Acidente de Trabalho com Afastamento
+Equipamento Envolvido: Painel Principal de Distribuição Elétrica (380V)
+
+--------------------------------------------------------------------------------
+2. NARRATIVA DETALHADA DA OCORRÊNCIA (SUMMARY)
+--------------------------------------------------------------------------------
+Durante o procedimento de manutenção preventiva no Painel de Distribuição Elétrica
+do Galpão 03, o eletricista iniciou a troca de um disjuntor sem realizar a
+devida verificação de ausência de tensão com o multímetro e sem a aplicação do
+bloqueio físico LOTO (Lockout/Tagout).
+
+Ao aproximar a chave de fenda da barra energizada, ocorreu um arco elétrico
+(flashover) seguido de um curto-circuito de alta intensidade. O trabalhador
+sofreu queimaduras de segundo grau nos membros superiores e face, além de ter
+sido arremessado contra a estrutura metálica de apoio devido à força da explosão.
+
+Palavras-chave registradas na fiscalização de campo:
+painel elétrico, choque elétrico, arco elétrico, queimadura, disjuntor energizado,
+alta tensão, ausência de bloqueio LOTO, NR-10.
+
+--------------------------------------------------------------------------------
+3. AÇÕES IMEDIATAS ADOTADAS
+--------------------------------------------------------------------------------
+- Desenergização de emergência da subestação local por acionamento do botão master.
+- Prestação de primeiros socorros pela equipe de brigada e remoção do acidentado
+  para atendimento médico hospitalar.
+- Isolamento e sinalização da área atingida para perícia técnica do SESMT.
+
+--------------------------------------------------------------------------------
+4. RECOMENDAÇÕES PRELIMINARES DO SESMT
+--------------------------------------------------------------------------------
+1. Obrigatoriedade de aplicação estrita do procedimento de desenergização e
+   sinalização de impedimento de reenergização (NR-10).
+2. Fornecimento e uso compulsório de vestimentas de proteção contra arcos
+   elétricos (NFPA 70E / NR-10) para toda a equipe elétrica.
+3. Recapacitação urgente de toda a equipe em procedimentos de Lockout/Tagout (LOTO).
+================================================================================

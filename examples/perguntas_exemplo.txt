@@ -1,0 +1,59 @@
+================================================================================
+          SAFEGUARD - EXEMPLOS DE PERGUNTAS PARA TESTE DO ASSISTENTE RAG
+================================================================================
+Este arquivo contém um conjunto diversificado de perguntas divididas por área
+normativa e categoria de risco para testes de validação do Assistente RAG de SST.
+
+--------------------------------------------------------------------------------
+1. TRABALHO EM ALTURA E CONSTRUÇÃO CIVIL (NR-35 / NR-18) - Categoria: Queda
+--------------------------------------------------------------------------------
+[P1] Quais são os requisitos obrigatórios para execução de trabalho em altura acima de 2 metros segundo a NR-35?
+[P2] Quais itens de proteção individual e coletiva são necessários no uso de andaimes na construção civil (NR-18)?
+[P3] Quando é obrigatória a emissão da Permissão de Trabalho (PT) e da Análise de Risco (AR) para trabalho em altura?
+[P4] Quais são as exigências para inspeção e ancoragem do cinto de segurança tipo paraquedista?
+
+--------------------------------------------------------------------------------
+2. SEGURANÇA EM INSTALAÇÕES ELÉTRICAS (NR-10) - Categoria: Elétrico
+--------------------------------------------------------------------------------
+[P5] Quais são as medidas de proteção coletiva prioritárias para serviços em instalações elétricas segundo a NR-10?
+[P6] Qual é o procedimento correto para desenergização e sinalização de um painel elétrico de alta tensão?
+[P7] Quais EPIs e vestimentas de proteção são obrigatórios para trabalhos com risco de arco elétrico?
+[P8] Quem é considerado um trabalhador qualificado e autorizado para atuar em instalações elétricas?
+
+--------------------------------------------------------------------------------
+3. MÁQUINAS E EQUIPAMENTOS (NR-12) - Categoria: Esmagamento/Impacto
+--------------------------------------------------------------------------------
+[P9] Quais são os requisitos mínimos para instalação de proteções fixas e móveis em prensas e guilhotinas segundo a NR-12?
+[P10] O que a NR-12 estabelece em relação aos dispositivos de parada de emergência em máquinas operacionais?
+[P11] Quais procedimentos de segurança devem ser adotados na manutenção de máquinas para evitar partida acidental (Lockout/Tagout)?
+[P12] Quais informações e sinalizações devem constar obrigatoriamente no manual e no corpo das máquinas industriais?
+
+--------------------------------------------------------------------------------
+4. ESPAÇOS CONFINADOS (NR-33) - Categoria: Asfixia/Intoxicação
+--------------------------------------------------------------------------------
+[P13] O que caracteriza um Espaço Confinado segundo a NR-33 e quais são os deveres do Vigia?
+[P14] Quais são as etapas obrigatórias para emissão da Permissão de Entrada e Trabalho (PET) em espaços confinados?
+[P15] Como deve ser feito o monitoramento atmosférico contínuo antes e durante o acesso a um tanque ou silo?
+
+--------------------------------------------------------------------------------
+5. PROTEÇÃO CONTRA INCÊNDIOS E FLUIDOS (NR-23 / NR-20) - Categoria: Incêndio/Explosão
+--------------------------------------------------------------------------------
+[P16] Quais são os requisitos de sinalização e desobstrução das saídas de emergência e rotas de fuga segundo a NR-23?
+[P17] Como deve ser feito o armazenamento seguro de líquidos inflamáveis e combustíveis segundo a NR-20?
+[P18] Quais tipos de extintores são indicados para combater incêndios das classes A, B e C em ambiente industrial?
+
+--------------------------------------------------------------------------------
+6. GERENCIAMENTO DE RISCOS E EPI (NR-01 / NR-06 / NR-15) - Geral e Insalubridade
+--------------------------------------------------------------------------------
+[P19] O que é o Programa de Gerenciamento de Riscos (PGR) exigido pela NR-01 e qual a responsabilidade do empregador?
+[P20] Quais são as obrigações do empregador e do empregado quanto ao fornecimento, guarda e conservação dos EPIs (NR-06)?
+[P21] Quais são os limites de tolerância para exposição ao ruído contínuo ou intermitente segundo a NR-15?
+
+--------------------------------------------------------------------------------
+7. TESTES NEGATIVOS / FORA DE ESCOPO (Verificação de Ausência de Alucinação)
+--------------------------------------------------------------------------------
+[P22] Qual é a alíquota de imposto de renda incidente sobre lucros distribuídos a acionistas?
+[P23] Como funciona o processo de licenciamento ambiental de barragens no IBAMA?
+[P24] Quais são as regras de trânsito para ultrapassagem em rodovias federais segundo o CTB?
+(Nota: Para estas perguntas P22-P24, o RAG deve responder que a informação está ausente da base oficial de NRs).
+================================================================================

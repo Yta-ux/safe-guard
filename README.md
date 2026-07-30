@@ -71,9 +71,14 @@ safe-guard/
 │   ├── Dockerfile
 │   └── package.json
 │
+├── examples/                       # Exemplos e insumos para testes
+│   ├── perguntas_exemplo.txt       # Perguntas normativas e de validação para RAG
+│   ├── relatorio_exemplo.txt       # Relatório simulado em TXT para upload/OCR
+│   └── relatorio_exemplo.md        # Relatório simulado em Markdown
+│
 ├── notebooks/                      # Componente A — Classificador ML
-│   ├── componente_a_classificador.ipynb  # Notebook executado e documentado
-│   ├── OSHA construction 4470 cases original.xlsx # Dataset de 4.470 casos
+│   ├── classificador.ipynb         # Notebook executado e documentado
+│   ├── base_de_casos.xlsx          # Dataset de 4.470 casos
 │   └── .venv/                      # Ambiente virtual isolado
 │
 ├── docker-compose.yml              # Orquestração Docker
@@ -127,7 +132,7 @@ npm run dev
 ```bash
 cd notebooks
 source .venv/bin/activate
-jupyter notebook componente_a_classificador.ipynb
+jupyter notebook classificador.ipynb
 ```
 
 ---
@@ -136,3 +141,7 @@ jupyter notebook componente_a_classificador.ipynb
 
 Para uma análise detalhada das decisões técnicas, matrizes de confusão, explicabilidade XAI, arquitetura do RAG e reflexão sobre MLOps, consulte o documento completo:
 👉 **[relatorio_final.md](relatorio_final.md)**
+
+Para arquivos de exemplo (perguntas de teste para o RAG e relatório simulado de incidente para upload), consulte a pasta:
+👉 **[`examples/`](examples)** (`perguntas_exemplo.txt`, `relatorio_exemplo.txt`, `relatorio_exemplo.md`)
+
