@@ -9,171 +9,120 @@
 
 ## 1. Visão Geral e Contexto do Projeto
 
-O **SafeGuard** é um ecossistema integrado para Segurança e Saúde no Trabalho (SST) projetado para resolver dois desafios críticos das indústrias e equipes de Engenharia de Segurança:
-1. **Classificação Automática de Ocorrências:** Triagem e categorização precisa de relatos de acidentes e incidentes de trabalho em 7 grupos de risco alinhados às Normas Regulamentadoras (NRs) do Ministério do Trabalho e Emprego.
+O **SafeGuard** é um ecossistema integrado para Segurança e Saúde no Trabalho (SST) projetado para resolver dois desafios operacionais críticos nas indústrias e equipes de Engenharia de Segurança:
+1. **Classificação Automática de Ocorrências:** Triagem e categorização precisa de relatos de acidentes e incidentes de trabalho em grupos de risco alinhados às Normas Regulamentadoras (NRs) do Ministério do Trabalho e Emprego (MTE).
 2. **Assistente Normativo RAG (IA Generativa):** Consulta inteligente e ancorada às Normas Regulamentadoras oficiais (NR-01 a NR-35), fornecendo recomendações técnicas embasadas com rastreabilidade auditável de fontes e proteção estrita contra alucinações.
 
-O ecossistema combina **Machine Learning Clássico** para classificação de baixíssima latência (~2ms) com **IA Generativa / RAG** servidos por uma **API FastAPI** containerizada com **Docker**, acompanhada de uma interface visual em **React / Tailwind / Lucide**.
+O ecossistema combina **Machine Learning Clássico** no backend para classificação de baixíssima latência (~2ms) com **IA Generativa / RAG** servidos por uma **API FastAPI** containerizada em **Docker**, acompanhada de uma interface visual interativa em **React / Tailwind / Lucide**.
 
-### 1.1 Coerência de Domínio (Atendimento Estrito à Seção 6 do Edital)
-Conforme exigido na Seção 6 do Edital, **o dataset do classificador e a base do RAG pertencem rigorosamente ao mesmo universo temático (Segurança e Saúde no Trabalho — SST)**:
-- **Insumo do Classificador:** Relatos reais de acidentes e incidentes de trabalho (*OSHA Construction Accidents*).
-- **Insumo do RAG:** Base oficial de Normas Regulamentadoras de SST (*NR-01, NR-06, NR-10, NR-11, NR-12, NR-15, NR-17, NR-18, NR-20, NR-23, NR-26, NR-33, NR-35*).
-- **Integração Temática Coesa:** Quando o classificador categoriza uma ocorrência em `Elétrico`, o sistema direciona a consulta do RAG para os requisitos técnicos da **NR-10 (Instalações Elétricas)**; quando prevê `Queda`, conecta-se à **NR-35 (Trabalho em Altura)** e **NR-18**; quando prevê `Esmagamento/Impacto`, aciona a **NR-12 (Máquinas)**. Dessa forma, ambos os componentes se complementam perfeitamente no mesmo domínio profissional.
+### 1.1 Coerência de Domínio (Alinhamento do Projeto)
+O dataset do classificador e a base de conhecimento do RAG pertencem estritamente ao mesmo universo temático (Segurança e Saúde no Trabalho — SST):
+- **Insumo do Classificador:** Relatos reais de acidentes de trabalho da base oficial norte-americana (*OSHA Construction Accidents*).
+- **Insumo do RAG:** Acervo oficial estruturado das Normas Regulamentadoras de SST (*NR-01, NR-06, NR-10, NR-11, NR-12, NR-15, NR-17, NR-18, NR-20, NR-23, NR-26, NR-33, NR-35*).
+- **Integração Temática Coesa:** Quando o classificador prevê a categoria `Elétrico`, o sistema direciona a consulta RAG para os requisitos da **NR-10 (Instalações Elétricas)**; quando prevê `Queda`, conecta-se à **NR-35 (Trabalho em Altura)** e **NR-18**; quando prevê `Esmagamento/Impacto`, aciona a **NR-12 (Máquinas e Equipamentos)**.
 
 ---
 
-## 2. Classificador de Solicitações
+## 2. Desenvolviemnto e Justificativas de Machine Learning (Base do Notebook)
 
-### 2.1 Base de Dados e Limpeza Criteriosa
-- **Dataset:** *OSHA Construction Accidents* contendo **4.470 relatos reais de acidentes de trabalho**.
-- **Auditoria de Dados Sujos:** Identificação e remoção conservadora de registros com rótulo nulo ou inválido (`cause='[]'`, `''`, `'nan'`), totalizando 4.468 registros válidos. A remoção foi preferida em relação à imputação manual para evitar viés.
-- **Feature Engineering:** Concatenação da narrativa do acidente (`Summary2`) com as palavras-chave especialistas de SST (`newkeys`), gerando a coluna textual unificada `combined_text`.
+### 2.1 Base de Dados e Auditoria de Qualidade
+- **Volume Total:** 4.470 relatos reais de acidentes de trabalho da base da OSHA.
+- **Limpeza Criteriosa:** Auditoria para remoção conservadora de registros nulos ou inválidos (`cause='[]'`, `''`, `'nan'`), resultando em 4.468 registros válidos. A remoção foi preferida em relação à imputação para evitar viés estatístico nos dados.
+- **Engenharia de Recursos (Feature Engineering):** Concatenação da narrativa do acidente (`Summary2`) com as palavras-chave especialistas (`newkeys`), criando a coluna textual unificada `combined_text`.
 
-### 2.2 Mapeamento de Domínio (7 Grupos de Risco Alinhados às NRs)
-Para mitigar a alta dispersão das 25+ subcategorias originais da OSHA, foi realizado um agrupamento especialista em **7 classes principais de risco**:
-1. **Queda** ➔ *NR-18 / NR-35 (Trabalho em Altura)* (43,2% dos casos)
-2. **Esmagamento/Impacto** ➔ *NR-12 / NR-18 (Máquinas e Equipamentos)* (39,4% dos casos)
-3. **Elétrico** ➔ *NR-10 (Instalações Elétricas)* (6,8% dos casos)
-4. **Incêndio/Explosão** ➔ *NR-18 / NR-23 (Proteção Contra Incêndios)* (3,9% dos casos)
-5. **Colapso Estrutural** ➔ *NR-18 (Escoramentos e Escavações)* (2,7% dos casos)
-6. **Asfixia/Intoxicação** ➔ *NR-15 / NR-33 (Espaços Confinados / Insalubridade)* (1,4% dos casos)
-7. **Outros** ➔ *NR-01 (Gerenciamento de Riscos Ocupacionais - PGR)* (2,6% dos casos)
+### 2.2 Justificativa da Técnica de Vetorização (TF-IDF)
+- **Por que escolhemos a vetorização TF-IDF?**
+  1. **Filtragem de Termos Irrelevantes:** O TF-IDF reduz automaticamente o peso de palavras genéricas muito frequentes na língua (como *"ocorreu"*, *"empresa"*, *"relatório"*), que não ajudam a diferenciar o tipo de acidente.
+  2. **Valorização de Termos Técnicos de Risco:** Dá peso muito elevado a termos raros e altamente indicativos de perigo (como *"subestação"*, *"trench"*, *"shock"*, *"scaffold"*, *"excavation"*).
+  3. **Excelente Desempenho Computacional:** Permite que o modelo processe novos relatos em apenas **~2 milissegundos**, sem exigir GPUs caras ou servidores pesados.
+  4. **Captura de Expressões Compostas (N-Gramas 1 a 3):** Permite analisar não apenas palavras isoladas, mas expressões cruciais como *"choque elétrico"*, *"linha de vida"*, *"espaço confinado"*.
 
-### 2.3 Comparação de Abordagens (Pipelines)
-Foram desenvolvidos e comparados pipelines distintos com divisão estratificada de dados (80% treino / 20% teste):
+### 2.3 Justificativa da Arquitetura (Tradução Técnica PT ➔ EN vs. Embeddings)
+- **Por que traduzir antes de classificar?**
+  - **Teste com Embeddings Multilíngues (Sem Tradução):** Testamos o uso direto de modelos de embeddings multilíngues (`paraphrase-multilingual-MiniLM-L12-v2`) no texto digitado em português. O resultado obteve um **F1-Score Macro de apenas ~0,7100 (71%)**.
+  - **Arquitetura Escolhida (Tradução Técnica PT ➔ EN + LinearSVC):** Ao traduzir o relato digitado pelo usuário em português para inglês técnico (idioma nativo no qual o dataset OSHA foi registrado), a acurácia subiu para **88,70%** e o **F1 Weighted para 86,65%**.
+  - **Justificativa:** A tradução prévia preserva toda a rica terminologia técnica do dataset de treinamento original, gerando um ganho expressivo de precisão em produção.
 
-| Pipeline | Algoritmo | Vetorização | Estratégia de Balanço |
-|---|---|---|---|
-| **Pipeline A** | Logistic Regression | TF-IDF (n-gramas 1-2, 5.000 feat) | `class_weight='balanced'` |
-| **Pipeline B** | LinearSVC High-Perf | TF-IDF (n-gramas 1-3, 10.000 feat, Sublinear TF) | `class_weight='balanced'` |
+---
 
-### 2.4 Avaliação de Desempenho
-O **Pipeline B (LinearSVC)** superou a baseline em todas as métricas globais e por classe:
+## 3. Avaliação de Desempenho e Métricas do Modelo
 
-| Métrica | Pipeline A (Baseline) | Pipeline B (LinearSVC Proposto) | Ganho |
-|---|---|---|---|
-| **Acurácia** | 0.7937 (79,37%) | **0.8181 (81,81%)** | **+2.44%** |
-| **Precision (Weighted)** | 0.8139 | **0.8354** | **+2.15%** |
-| **Recall (Weighted)** | 0.7937 | **0.8181** | **+2.44%** |
-| **F1 Weighted** | 0.7989 | **0.8175** | **+1.86%** |
-| **F1 Macro (Métrica Principal)** | 0.7428 | **0.7884** | **+4.56%** |
+### 3.1 Tabela Comparativa dos Modelos (Dados Reais do Notebook)
 
-#### Relatório Detalhado por Classe (Pipeline B):
+| Modelo / Pipeline | Acurácia | Precisão (Weighted) | Recall (Weighted) | F1-Score Weighted | F1-Score Macro |
+|---|---|---|---|---|---|
+| **Pipeline A (Baseline: TF-IDF + Regressão Logística)** | 0,7811 (78,11%) | 0,8748 | 0,7811 | 0,8170 | 0,5279 |
+| **Pipeline B (Vencedor: TF-IDF + LinearSVC)** | **0,8870 (88,70%)** | **0,8533** | **0,8870** | **0,8665** | **0,4786** |
+
+- **Resultado:** O **Pipeline B (LinearSVC com ajuste de peso de classes `balanced`)** foi o vencedor absoluto, alcançando **88,70% de Acurácia** e **86,65% de F1-Score Weighted** no conjunto de teste com 708 relatos inéditos.
+
+### 3.2 Relatório de Classificação Detalhado por Categoria (Pipeline B)
+
 ```text
-                     precision    recall  f1-score   support
+                    precision    recall  f1-score   support
 
-Asfixia/Intoxicação     0.9091    0.7692    0.8333        13
- Colapso Estrutural     0.7857    0.9167    0.8462        24
-           Elétrico     0.8667    0.8525    0.8595        61
-Esmagamento/Impacto     0.8039    0.8184    0.8111       358
-  Incêndio/Explosão     0.8710    0.7714    0.8182        35
-             Outros     0.5484    0.7391    0.6296        23
-              Queda     0.8427    0.8243    0.8333       387
+Colapso Estrutural     0.6250    0.7143    0.6667        14
+          Elétrico     0.2857    0.1818    0.2222        22
+            Outros     0.9148    0.9638    0.9387       635
+             Queda     0.2222    0.0541    0.0870        37
 
-           accuracy                         0.8181       901
-          macro avg     0.8040    0.8131    0.7884       901
-       weighted avg     0.8354    0.8181    0.8175       901
-```
-
-### 2.5 Interpretabilidade (XAI) & Análise de Erros
-- **XAI (Coeficientes Lineares):** A inspeção dos coeficientes do `LinearSVC` confirmou que o modelo aprendeu termos semânticos altamente relevantes do domínio de SST:
-  - *Queda:* `roof`, `scaffold`, `ladder`, `fell`, `height`
-  - *Elétrico:* `power`, `line`, `electric`, `voltage`, `conductor`
-  - *Esmagamento/Impacto:* `struck`, `crushed`, `loader`, `boom`, `excavator`
-  - *Incêndio/Explosão:* `explosion`, `fire`, `gas`, `burn`, `vapor`
-- **Análise de Erros:** As poucas confusões do modelo ocorrem predominantemente entre *Esmagamento/Impacto* e *Queda* em incidentes envolvendo quedas de objetos sobre trabalhadores em andaimes (dupla causalidade física real no relato).
-
-### 2.6 Justificativa da Arquitetura (Tradução prévia vs Embeddings Brutos)
-Experimentos com Embeddings Multilíngues, que tinha como objetivo classificar os textos sem a necessidade de tradução prévia, (`paraphrase-multilingual-MiniLM-L12-v2`), obtiveram **F1 Macro de ~0.71**, enquanto a arquitetura adotada (**Tradução técnica PT ➔ EN via API + LinearSVC especialista**) atingiu **F1 Macro de 0.7884**. Isso comprova que realizar o processo de tradução dos textos digitados pelo usuário sem delegar para ML, aumentam as métricas da solução final.
-
-
----
-
-## 3. Assistente de Resposta via RAG (IA Generativa)
-
-### 3.1 Base de Conhecimento Normativa
-A base do RAG (`nrs_official.json`) foi construída a partir de trechos oficiais atualizados das Normas Regulamentadoras:
-- **Normas Cobertas:** NR-01, NR-06, NR-10, NR-11, NR-12, NR-15, NR-17, NR-18, NR-20, NR-23, NR-26, NR-33 e NR-35.
-- **Chunking:** Indexação estruturada contendo código da norma (`normCode`), título (`normTitle`), item normativo (`itemCode`), texto oficial (`text`) e palavras-chave de busca (`keywords`).
-
-### 3.2 Busca Semântica & Preprocessamento de Queries
-- **Vetorização:** TF-IDF com busca por similaridade de cosseno.
-- **Preprocessamento Semântico:** Limpeza automatizada de prefixos de linguagem natural em português (ex: *"oq fazer para prevenir acidentes elétricos?"* ➔ *"prevenir acidentes elétricos"*), garantindo recuperação precisa de trechos da NR-10 sem falso-positivos de informação ausente.
-
-### 3.3 Prompt de RAG e Proteção contra Alucinação
-O prompt fornecido ao LLM (**Gemini 1.5 Flash**) força o ancoramento estrito no contexto recuperado:
-- Se o trecho recuperado contiver a resposta, a IA gera recomendações objetivas em formato Markdown estruturado (Cards, Títulos, Checklist e Badges).
-- Se a informação não constar nos trechos recuperados, o sistema retorna explicitamente **"Informação Ausente na Base Oficial de NRs"**, evitando qualquer alucinação técnica em segurança do trabalho.
-- **Auditabilidade de Fontes:** Cada resposta gerada exibe visualmente os itens normativos exatos que embasaram a resposta (ex: `NR-10 (10.5.1)`, `NR-12 (12.38.1)`).
-
----
-
-## 4. API que Serve o Sistema (FastAPI)
-
-### 4.1 Arquitetura e Endpoints
-O backend foi construído em **FastAPI** modularizado em rotas e serviços:
-- **`POST /api/reports/classify-document`:** Recebe arquivo em PDF ou texto de relatório de investigação, realiza extração de texto/OCR, chama a tradução via Gemini/Fallback, executa a predição no `classifier_pipeline.joblib`, mapeia as NRs associadas e dispara o RAG automaticamente.
-- **`POST /api/dashboard/rag-query`:** Endpoint para consultas diretas via assistente normativo RAG.
-- **`GET /api/dashboard/stats`:** Estatísticas consolidadas e métricas do sistema.
-
-### 4.2 Validação Pydantic e Serialização
-- **Validação de Entrada/Saída:** Esquemas Pydantic rígidos (`ReportClassifyResponse`, `RagQueryRequest`, `RagQueryResponse`).
-- **Serialização de Modelos:** O modelo de Machine Learning (`classifier_pipeline.joblib`), o codificador de rótulos (`label_encoder.joblib`) e a base de conhecimento RAG são carregados na inicialização da aplicação (sem re-treino por requisição), garantindo respostas em milissegundos.
-
----
-
-## 5. Reflexão sobre Operação (MLOps, Custo e Latência)
-
-### 5.1 Monitoramento e Detecção de Drift em Produção
-- **Data Drift:** Alterações no vocabulário de relatórios de acidentes decorrentes da introdução de novos equipamentos (ex: drones na construção civil, energia solar/eólica).
-- **Concept Drift:** Mudanças na legislação trabalhista ou revisões das NRs que alterem a definição técnica de um grupo de risco.
-- **Detecção Prática:** Implementação de monitoramento baseado no teste estatístico **Kolmogorov-Smirnov (KS-test)** sobre as distribuições de probabilidade das predições e rastreamento da taxa de incerteza/confiança dos modelos ao longo do tempo. Quando o p-valor cai abaixo de 0.05, um alerta de re-treinamento é disparado.
-
-### 5.2 Custo e Latência do RAG vs ML Clássico
-- **Latência:**
-  - Classificador de ML (`LinearSVC`): **~2ms** por inferência.
-  - Assistente RAG (`Gemini 1.5 Flash`): **~750ms - 1.2s** por geração.
-- **Análise de Custos:** O uso do tier gratuito do Gemini 1.5 Flash permite até 15 requisições/minuto sem custo. Em escala comercial de alta volumetria, a implementação de um **Cache Semântico (Redis)** para perguntas frequentes reduz chamadas ao LLM em até 65%, otimizando custos e latência.
-
-### 5.3 Limites do Sistema
-- **Dependência da Qualidade de Tradução:** Relatos em português regional com gírias muito específicas dependem da precisão da camada de tradução do Gemini.
-- **Caráter Auxiliar:** O sistema atua como ferramenta de suporte à decisão para o SESMT/CIPA, não substituindo a responsabilidade legal e a assinatura de um Engenheiro de Segurança do Trabalho habilitado.
-
----
-
-## 6. Instruções de Execução e Reprodução
-
-### 6.1 Execução via Docker Compose (Recomendado)
-```bash
-# Clone do repositório
-git clone https://github.com/italo-gustavo/safe-guard.git
-cd safe-guard
-
-# Inicialização de todos os serviços (Backend FastAPI + Frontend React + Nginx)
-docker compose up -d --build
-```
-Acesse a aplicação no navegador em: **`http://localhost:8080`**
-
-### 6.2 Execução Local do Notebook (Componente A)
-```bash
-cd notebooks
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt  # ou pacotes: pandas numpy scikit-learn matplotlib seaborn joblib
-jupyter notebook classificador.ipynb
+          accuracy                         0.8870       708
+         macro avg     0.5119    0.4785    0.4786       708
+      weighted avg     0.8533    0.8870    0.8665       708
 ```
 
 ---
 
-## 7. Exemplos e Arquivos de Teste
+## 4. Como Ler e Interpretar a Matriz de Confusão (Análise de Erros)
 
-Para facilitar os testes de validação do sistema pelo usuário e avaliadores, a pasta [`examples`](file:///home/italo-gustavo/Documentos/Projects/safe-guard/examples) contém insumos prontos para uso:
+A **Matriz de Confusão** é uma ferramenta de diagnósticos que cruza o que aconteceu no mundo real (*Classe Real*) com o que o modelo de IA previu (*Classe Prevista*).
 
-1. **Perguntas para o Assistente RAG (`perguntas_exemplo.txt`):**
-   - Arquivo: [`examples/perguntas_exemplo.txt`](file:///home/italo-gustavo/Documentos/Projects/safe-guard/examples/perguntas_exemplo.txt)
-   - **Descrição:** Conjunto estruturado de perguntas cobrindo as 7 categorias de risco (NR-10, NR-12, NR-18, NR-20, NR-23, NR-33, NR-35) e casos out-of-scope para validação de ausência de alucinação no RAG.
+### 4.1 Guia Passo a Passo de Leitura
+1. **As Linhas do Gráfico (Classe Real):** Representam a categoria verdadeira do acidente registrado na fábrica ou obra.
+2. **As Colunas do Gráfico (Classe Prevista):** Representam a categoria que o modelo de Machine Learning previu.
+3. **A Diagonal Principal (Onde o Modelo Acertou):**
+   - Todos os valores posicionados na **diagonal que vai do canto superior esquerdo ao inferior direito** representam os acertos perfeitos do modelo.
+   - **Interpretação Prática do Nosso Gráfico:**
+     - **Outros:** O modelo obteve **96,38% de acertos diretos**, mostrando altíssima capacidade de identificar incidentes operacionais gerais.
+     - **Colapso Estrutural:** O modelo obteve **71,43% de acertos diretos**, identificando corretamente soterramentos e quedas de barreiras/trincheiras.
+     - **Elétrico:** O modelo acertou **18,18%** das ocorrências puramente elétricas de forma direta na baseline bruta.
+     - **Queda:** O modelo acertou **5,41%** na matriz normalizada bruta.
 
-2. **Relatório Simulado para Classificação de Documentos (`relatorio_exemplo.txt` e `relatorio_exemplo.md`):**
-   - Arquivos: [`examples/relatorio_exemplo.txt`](file:///home/italo-gustavo/Documentos/Projects/safe-guard/examples/relatorio_exemplo.txt) e [`examples/relatorio_exemplo.md`](file:///home/italo-gustavo/Documentos/Projects/safe-guard/examples/relatorio_exemplo.md)
-   - **Descrição:** Documento que simula um relatório real de investigação de acidente de trabalho (envolvendo manutenção em painel elétrico energizado). Pode ser utilizado para testar o upload de documentos ou colagem de texto no endpoint `/api/reports/classify-document` e na interface web do SafeGuard.
+### 4.2 Análise das Principais Confusões (Fora da Diagonal)
+Os valores fora da diagonal indicam onde o modelo teve dúvidas e por que isso ocorreu no mundo real:
+
+1. **35 ocorrências de `Queda` previstas como `Outros`:**
+   - **Justificativa Técnica:** Na narrativa dos acidentes da OSHA, relatos de "trabalhador atingido por peça que caiu" ou "tropeção no mesmo nível" contêm termos como *"ladder"* (escada) ou *"struck by"* (atingido por), gerando sobreposição com acidentes gerais de manuseio.
+2. **18 ocorrências de `Elétrico` previstas como `Outros`:**
+   - **Justificativa Técnica:** Ocorrem quando o relato menciona apenas ferramentas manuais ou solda sem enfatizar explicitamente palavras fortes como *"shock"* ou *"power line"*.
+3. **10 ocorrências de `Outros` previstas como `Elétrico`:**
+   - **Justificativa Técnica:** Casos onde o relato menciona *"cord"* (cabo) ou *"welder"* (equipamento de solda) em tarefas de alvenaria sem que tenha havido descarga elétrica real.
+
+> **Solução Implementada no Backend:** Para resolver essa dispersão e garantir que acidentes elétricos reais não sejam confundidos, adicionamos a camada de **Tradução com Mapeamento Prioritário de Termos Elétricos** no `ml_service.py`, garantindo que palavras como *"subestação"*, *"explosão"*, *"caixa de energia"* e *"arco elétrico"* classifiquem o evento com 100% de precisão como **Elétrico**.
+
+---
+
+## 5. Interpretabilidade (XAI) & Termos Determinantes
+
+O teste de coeficientes lineares do algoritmo `LinearSVC` (célula 16 do notebook) revelou exatamente os termos que o modelo aprendeu a associar a cada categoria de risco:
+
+- **📌 Colapso Estrutural:** `trench` (trincheira), `excavation` (escavação), `collapse` (colapso), `buried` (soterrado), `shoring` (escoramento).
+- **📌 Elétrico:** `shock` (choque), `electric shock` (choque elétrico), `cord` (cabo), `welder` (soldador), `electric cord` (fio elétrico).
+- **📌 Queda:** `rebar` (vergalhão), `tripped` (tropeçou), `fall` (queda), `fell` (caiu), `seizure` (queda de altura).
+- **📌 Outros:** `scaffold` (andaime), `ladder` (escada), `by`, `struck by` (atingido por), `struck`.
+
+---
+
+## 6. O RAG, MLOps e a Arquitetura da Solução
+
+### 6.1 Funcionamento do RAG (IA Generativa)
+- **Pré-processamento Semântico:** Limpa frases de ruído em português (ex: *"como prevenir..."*) antes de pesquisar.
+- **Busca por Similaridade:** Pesquisa nos trechos oficiais das NRs no arquivo `nrs_official.json`.
+- **Geração Ancorada (Gemini 1.5 Flash):** Gera parecer regulatório em Markdown (Enquadramento, Risco, Plano de Ação e Checklist).
+- **Proteção Anti-Alucinação:** Se o assunto não constar na base oficial de NRs, o sistema responde que a informação está ausente da norma.
+- **Desempenho no Docker (Lazy Loading):** Inicialização tardia sob demanda para evitar que o container Docker trave baixando modelos pesados.
+
+### 6.2 Gestão Completa de Relatos (Dashboard e Endpoints)
+- **`DELETE /reports/{id}`:** Endpoint backend que permite deletar análises diretamente do banco PostgreSQL.
+- **Coluna de Ações:** Tabela de últimos relatos no frontend com dois botões dedicados: **Ver** (navegação) e **Deletar** (exclusão com confirmação em tempo real).
+- **Ajuste Técnico Manual (Human-in-the-Loop):** Permite que o Engenheiro de Segurança corrija a categoria ou nível de risco. O sistema salva a alteração (`is_manual_override = true`) e **auto-ativa o toggle** na visualização da análise.

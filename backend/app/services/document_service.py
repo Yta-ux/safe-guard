@@ -354,22 +354,15 @@ def build_classification_input(
 def process_document(filename: str, file_bytes: bytes) -> Dict:
     """
     Pipeline completo de processamento de documento:
-    1. Extrai texto de TODAS as páginas
-    2. Analisa TODO o conteúdo em busca de termos de segurança
+    1. Extrai texto de todas as páginas
+    2. Analisa todo o conteúdo em busca de termos de segurança
     3. Mapeia sinônimos técnicos
-    4. Gera texto condensado para o classificador
+    4. Gera texto condensado para o classificador ML
     5. Retorna metadados de análise para o frontend
     """
-    print("\n" + "=" * 70)
-    print(f"[SAFEGUARD DOC SERVICE] 📄 Processando documento: '{filename}'")
-    print(f"  Tamanho: {len(file_bytes) / 1024:.1f} KB")
-    print("=" * 70)
-
-    # 1. Extração completa do texto
     full_text = extract_text_from_file(filename, file_bytes)
 
     if not full_text or len(full_text.strip()) < 10:
-        print("[Doc Service ERROR] Não foi possível extrair texto do documento.")
         return {
             "success": False,
             "error": "Não foi possível extrair texto do documento. Verifique se o arquivo não está protegido ou vazio.",
@@ -380,16 +373,8 @@ def process_document(filename: str, file_bytes: bytes) -> Dict:
             "stats": {"totalChars": 0, "totalTokens": 0, "keywordsFound": 0},
         }
 
-    # 2. Extração de palavras-chave com mapeamento de sinônimos
     keywords, raw_matches, frequency = extract_safety_keywords(full_text)
-
-    # 3. Construção do texto condensado para o classificador
     classification_input = build_classification_input(full_text, keywords, raw_matches)
-
-    print(f"\n  [Doc Service] Texto para classificação ({len(classification_input)} chars):")
-    print(f"  '{classification_input[:200]}...'")
-    print("=" * 70 + "\n")
-
     tokens = tokenize_and_clean(full_text)
 
     return {
@@ -406,3 +391,4 @@ def process_document(filename: str, file_bytes: bytes) -> Dict:
             "keywordsFound": len(keywords),
         },
     }
+

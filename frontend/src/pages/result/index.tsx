@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,6 +14,7 @@ import {
   Info,
   ChevronDown,
   Loader2,
+  FileText,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
@@ -50,7 +51,6 @@ function RenderBoldText({ text }: { text: string }) {
 function FormattedMarkdown({ content }: { content: string }) {
   if (!content) return null;
 
-  // Split by headers (###)
   const sections = content.split(/(?=###|\n###)/g).filter((s) => s.trim().length > 0);
 
   return (
@@ -138,7 +138,6 @@ function ResultRagSection({ reportId }: ResultRagSectionProps) {
 
   return (
     <div className="w-full mb-8">
-      {/* Unified Accordion Header */}
       <button
         type="button"
         onClick={handleToggle}
@@ -157,7 +156,6 @@ function ResultRagSection({ reportId }: ResultRagSectionProps) {
         />
       </button>
 
-      {/* Accordion Content Container */}
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
@@ -168,7 +166,6 @@ function ResultRagSection({ reportId }: ResultRagSectionProps) {
             className="overflow-hidden bg-surface-container-lowest border border-t-0 border-outline-variant/70 rounded-b-xl shadow-xs"
           >
             <div className="p-6 md:p-8 flex flex-col gap-4">
-              {/* 1. Loading State */}
               {normMutation.isPending && (
                 <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
                   <Loader2 size={32} className="text-primary animate-spin" />
@@ -185,7 +182,6 @@ function ResultRagSection({ reportId }: ResultRagSectionProps) {
                 </div>
               )}
 
-              {/* 2. Error State */}
               {normMutation.isError && (
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
                   <AlertTriangle size={20} className="text-red-500 shrink-0 mt-0.5" />
@@ -209,7 +205,6 @@ function ResultRagSection({ reportId }: ResultRagSectionProps) {
                 </div>
               )}
 
-              {/* 3. Success State */}
               {normMutation.isSuccess && normMutation.data && (
                 <>
                   {!normMutation.data.foundInKnowledgeBase && (
@@ -236,7 +231,6 @@ function ResultRagSection({ reportId }: ResultRagSectionProps) {
                     <FormattedMarkdown content={normMutation.data.normResponse} />
                   </div>
 
-                  {/* Audit Excerpt */}
                   {normMutation.data.sourceExcerpt && (
                     <div className="bg-surface-container-low rounded-lg p-4 border-l-4 border-secondary border border-surface-container">
                       <p className="text-label-sm text-outline uppercase tracking-wider mb-1 font-semibold">
@@ -248,7 +242,6 @@ function ResultRagSection({ reportId }: ResultRagSectionProps) {
                     </div>
                   )}
 
-                  {/* Corrective Action */}
                   <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
                     <p className="text-body-md text-on-surface">
                       <strong className="text-primary">Ação Corretiva Recomendada: </strong>
@@ -271,12 +264,18 @@ export default function ResultPage() {
   const { data: report, isLoading, isError, error, refetch } = useReport(id ?? '');
   const updateMutation = useUpdateClassification();
 
-  // Manual correction state
   const [isCorrectionMode, setIsCorrectionMode] = useState(false);
   const [editedCategory, setEditedCategory] = useState<string | null>(null);
   const [editedRiskLevel, setEditedRiskLevel] = useState<RiskLevel | null>(null);
   const [correctionReason, setCorrectionReason] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (report?.classification?.isManualOverride) {
+      setIsCorrectionMode(true);
+    }
+  }, [report?.classification?.isManualOverride]);
+
 
   const handleSaveCorrection = useCallback(() => {
     if (!id || !report) return;
@@ -389,8 +388,41 @@ export default function ResultPage() {
           </div>
         </motion.div>
 
+        {/* Incident Description / Source File Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+          className="w-full mb-6"
+        >
+          <Card className="w-full bg-surface-container-lowest border-outline-variant/60">
+            <div className="p-5 md:p-6 flex flex-col gap-3">
+              <div className="flex items-center justify-between border-b border-outline-variant/40 pb-3">
+                <div className="flex items-center gap-2 text-primary font-bold text-headline-md">
+                  <FileText size={20} />
+                  <h2>Relato do Incidente Analisado</h2>
+                </div>
+                {report.text.startsWith('[Arquivo Anexado:') ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                    Documento Anexado
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                    Relato em Texto
+                  </span>
+                )}
+              </div>
+
+              <div className="bg-surface-container-low/70 p-4 rounded-lg border border-outline-variant/30 text-body-md text-on-surface leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto">
+                {report.text}
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
         {/* Minimalist Professional Correction Toggle Switch */}
         <div className="w-full flex justify-end mb-4">
+
           <label className="inline-flex items-center gap-2 cursor-pointer select-none text-label-sm text-on-surface-variant hover:text-primary transition-colors font-medium">
             <Sliders size={18} />
             <span>Ajuste Técnico Manual</span>

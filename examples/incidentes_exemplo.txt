@@ -1,0 +1,42 @@
+================================================================================
+       SAFEGUARD - EXEMPLOS DE INCIDENTES PARA TESTE DAS CATEGORIAS ML
+================================================================================
+Este arquivo contém descrições realistas de incidentes de segurança do trabalho
+para cada uma das 6 categorias de risco mapeadas no modelo de IA do SafeGuard.
+
+--------------------------------------------------------------------------------
+1. CATEGORIA: ELÉTRICO (NR-10)
+--------------------------------------------------------------------------------
+Relato de Teste:
+"Fui trocar uma caixa de energia numa subestação e ocorreu uma explosão no local, tornando um ambiente com alta propensão a acidentes elétricos e risco grave de arco elétrico."
+
+--------------------------------------------------------------------------------
+2. CATEGORIA: ESMAGAMENTO/IMPACTO (NR-12 / NR-11)
+--------------------------------------------------------------------------------
+Relato de Teste:
+"Durante a operação de limpeza da esteira de roletes na linha de embalagem, o operador teve a mão puxada para o ponto de prensamento por falta de proteção física intertravada e ausência de bloqueio LOTO."
+
+--------------------------------------------------------------------------------
+3. CATEGORIA: QUEDA (NR-35 / NR-18)
+--------------------------------------------------------------------------------
+Relato de Teste:
+"Trabalhador executando manutenção em telhado industrial a 5 metros de altura escorregou da estrutura. Não havia linha de vida instalada e o cinto paraquedista estava sem ancoragem."
+
+--------------------------------------------------------------------------------
+4. CATEGORIA: INCÊNDIO/EXPLOSÃO (NR-23 / NR-20)
+--------------------------------------------------------------------------------
+Relato de Teste:
+"Houve vazamento de solvente inflamável próximo à área de soldagem. As faíscas da operação entraram em contato com os vapores do combustível, provocando princípio de incêndio e deflagração."
+
+--------------------------------------------------------------------------------
+5. CATEGORIA: ASFIXIA/INTOXICAÇÃO (NR-33 / NR-15)
+--------------------------------------------------------------------------------
+Relato de Teste:
+"Operador entrou em tanque de estocagem de produtos químicos sem medição contínua de gases e sem sistema de exaustão, apresentando tontura e mal-estar por inalação de vapores tóxicos."
+
+--------------------------------------------------------------------------------
+6. CATEGORIA: COLAPSO ESTRUTURAL (NR-18)
+--------------------------------------------------------------------------------
+Relato de Teste:
+"Durante escavação de vala com 3 metros de profundidade para tubulação de esgoto, ocorreu o desmoronamento do talude lateral devido à ausência de escoramento e contenção estrutural."
+================================================================================

@@ -1,16 +1,22 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import type { ColumnDef } from '@tanstack/react-table';
+import { Eye, Trash2 } from 'lucide-react';
 import { DataTable, type ServerSortEvent } from '@/components/ui/data-table';
+import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/feedback/loading-spinner';
 import { ErrorMessage } from '@/components/feedback/error-message';
 import { useReports, type ReportSortParams } from '@/hooks/api/use-reports';
+import { useDeleteReport } from '@/hooks/api/use-delete-report';
 import { RiskLevel } from '@/@types/enums';
 import { formatDate, truncateText } from '@/lib/utils';
 import type { ReportWithClassification } from '@/@types/classification.types';
 
 export function RecentReportsTable() {
   const navigate = useNavigate();
+  const deleteMutation = useDeleteReport();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   const [sortState, setSortState] = useState<ReportSortParams>({
     orderColumn: 'created_at',
     orderDir: 'desc',
@@ -24,6 +30,18 @@ export function RecentReportsTable() {
       orderDir: sort.direction,
     });
   }, []);
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      if (window.confirm('Tem certeza de que deseja excluir esta análise de incidente?')) {
+        setDeletingId(id);
+        deleteMutation.mutate(id, {
+          onSettled: () => setDeletingId(null),
+        });
+      }
+    },
+    [deleteMutation],
+  );
 
   const columns = useMemo<ColumnDef<ReportWithClassification>[]>(
     () => [
@@ -94,7 +112,7 @@ export function RecentReportsTable() {
           const style = levelStyles[riskLevel] ?? levelStyles[RiskLevel.BAIXO];
 
           return (
-            <div className="flex flex-col items-start gap-1 cursor-pointer" onClick={() => navigate(`/result/${row.original.id}`)}>
+            <div className="flex flex-col items-start gap-1">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${style?.bg}`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${style?.dot}`} />
@@ -113,8 +131,36 @@ export function RecentReportsTable() {
           );
         },
       },
+      {
+        id: 'actions',
+        header: 'Ações',
+        enableSorting: false,
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate(`/result/${row.original.id}`)}
+              icon={<Eye size={14} />}
+              iconPosition="left"
+            >
+              Ver
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => handleDelete(row.original.id)}
+              isLoading={deletingId === row.original.id}
+              icon={<Trash2 size={14} />}
+              iconPosition="left"
+            >
+              Deletar
+            </Button>
+          </div>
+        ),
+      },
     ],
-    [navigate],
+    [navigate, handleDelete, deletingId],
   );
 
   return (
@@ -158,3 +204,4 @@ export function RecentReportsTable() {
     </div>
   );
 }
+

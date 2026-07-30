@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   icon?: ReactNode;
@@ -41,7 +41,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'bg-surface-container-lowest text-primary border-2 border-primary/50 hover:border-primary hover:bg-primary/10 focus:ring-primary shadow-xs hover:shadow-sm',
       ghost:
         'text-primary hover:bg-primary/15 hover:underline focus:ring-primary',
+      danger:
+        'bg-red-500/10 text-red-600 border border-red-500/30 hover:bg-red-500 hover:text-white dark:text-red-400 dark:hover:text-white focus:ring-red-500 shadow-xs',
     };
+
 
     const iconSizes = {
       sm: 14,

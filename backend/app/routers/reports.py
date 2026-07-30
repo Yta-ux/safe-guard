@@ -126,7 +126,6 @@ async def classify_document(file: UploadFile = File(...), db: Session = Depends(
     if len(file_bytes) == 0:
         raise HTTPException(status_code=400, detail="O arquivo enviado está vazio.")
 
-    # 1. Processamento completo do documento no backend
     doc_result = process_document(file.filename, file_bytes)
 
     if not doc_result["success"]:
@@ -135,16 +134,15 @@ async def classify_document(file: UploadFile = File(...), db: Session = Depends(
     classification_input = doc_result["classificationInput"]
     generated_id = generate_unique_report_id(db)
 
-    # 2. Classificação ML
     ml_result = ml_service.predict_risk(classification_input)
     xai_terms = doc_result["rawMatches"][:5] if doc_result["rawMatches"] else ml_result["xaiHighlightedTerms"]
 
-    # 3. Salva no Banco PostgreSQL
-    original_text_summary = doc_result["fullText"][:300] + ("..." if len(doc_result["fullText"]) > 300 else "")
+    full_extracted_text = doc_result["fullText"].strip()
+    formatted_text = f"[Arquivo Anexado: {file.filename}]\n\n{full_extracted_text}"
 
     db_report = DBReport(
         id=generated_id,
-        text=original_text_summary,
+        text=formatted_text,
         sector="Operacional",
     )
     db_classification = DBClassification(
@@ -174,6 +172,7 @@ async def classify_document(file: UploadFile = File(...), db: Session = Depends(
         },
         classification=resp.classification,
     )
+
 
 
 @router.get("", response_model=list[ReportWithClassificationResponse])
@@ -258,3 +257,18 @@ async def query_norm_for_report(report_id: str, db: Session = Depends(get_db)):
         correctiveAction=rag_result["correctiveAction"],
         foundInKnowledgeBase=rag_result["foundInKnowledgeBase"],
     )
+
+
+@router.delete("/{report_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_report(report_id: str, db: Session = Depends(get_db)):
+    """Deleta um relato e sua classificação associada do banco PostgreSQL."""
+    db_report = db.query(DBReport).filter(DBReport.id == report_id).first()
+    if not db_report:
+        raise HTTPException(status_code=404, detail=f"Relato '{report_id}' não encontrado no banco.")
+
+    if db_report.classification:
+        db.delete(db_report.classification)
+    db.delete(db_report)
+    db.commit()
+    return None
+
